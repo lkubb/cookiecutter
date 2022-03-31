@@ -227,9 +227,9 @@ def render_and_create_dir(
     return dir_to_create, not output_dir_exists
 
 
-def ensure_dir_is_templated(dirname):
+def ensure_dir_is_templated(dirname, jinja_var_start='{{', jinja_var_end='}}'):
     """Ensure that dirname is a templated directory name."""
-    if '{{' in dirname and '}}' in dirname:
+    if jinja_var_start in dirname and jinja_var_end in dirname:
         return True
     else:
         raise NonTemplatedInputDirException
@@ -278,14 +278,18 @@ def generate_files(
         if it exists.
     :param accept_hooks: Accept pre and post hooks if set to `True`.
     """
-    template_dir = find_template(repo_dir)
-    logger.debug('Generating project from %s...', template_dir)
     context = context or OrderedDict([])
 
     envvars = context.get('cookiecutter', {}).get('_jinja2_env_vars', {})
 
+    jinja_var_start = envvars.get('variable_start_string', '{{')
+    jinja_var_end = envvars.get('variable_end_string', '}}')
+
+    template_dir = find_template(repo_dir, jinja_var_start, jinja_var_end)
+    logger.debug('Generating project from %s...', template_dir)
+
     unrendered_dir = os.path.split(template_dir)[1]
-    ensure_dir_is_templated(unrendered_dir)
+    ensure_dir_is_templated(unrendered_dir, jinja_var_start, jinja_var_end)
     env = StrictEnvironment(context=context, keep_trailing_newline=True, **envvars)
     try:
         project_dir, output_directory_created = render_and_create_dir(
