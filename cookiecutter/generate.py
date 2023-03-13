@@ -68,10 +68,6 @@ def apply_overwrites_to_context(context, overwrite_context):
                     f"{overwrite} provided for choice variable {variable}, "
                     f"but the choices are {context_value}."
                 )
-        elif isinstance(context_value, dict) and isinstance(overwrite, dict):
-            # Partially overwrite some keys in original dict
-            apply_overwrites_to_context(context_value, overwrite)
-            context[variable] = context_value
         else:
             # Simply overwrite the value for this variable
             context[variable] = overwrite
